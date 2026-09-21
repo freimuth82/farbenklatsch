@@ -1,0 +1,157 @@
+@if (state(); as s) {
+  @if (s.status === 'finished' && s.result; as result) {
+    <section class="game-screen__result" [class.game-screen__result--perfect]="result.endType === 'perfectMatch'">
+      <h1 class="game-screen__result-title">
+        @if (result.endType === 'perfectMatch') {
+          Perfect Match!
+        } @else if (result.winner === null) {
+          Unentschieden
+        } @else {
+          {{ playerName(result.winner) }} gewinnt
+        }
+      </h1>
+      <p class="game-screen__result-meta">{{ endTypeLabel(result.endType) }}</p>
+      <dl class="game-screen__result-counts">
+        <dt>{{ playerName('player1') }}</dt>
+        <dd>{{ result.cardCounts.player1 }} Karten</dd>
+        <dt>{{ playerName('player2') }}</dt>
+        <dd>{{ result.cardCounts.player2 }} Karten</dd>
+      </dl>
+      <button type="button" class="game-screen__submit" (click)="newGame()">Neues Spiel</button>
+    </section>
+  } @else {
+    <div class="game-screen__layout">
+      <label class="game-screen__history-toggle">
+        <input
+          type="checkbox"
+          [checked]="showHistory()"
+          (change)="showHistory.set($any($event.target).checked)"
+        />
+        Spielverlauf anzeigen
+      </label>
+
+      <div class="game-screen__layout-row">
+        <div
+          class="game-screen__board"
+          [class.game-screen__board--side-by-side]="isSideBySideSeating()"
+        >
+          <div class="game-screen__player" [class.game-screen__player--rotated]="isFacingSeating()">
+        <p class="game-screen__player-name">{{ playerName('player2') }}</p>
+        <button
+          type="button"
+          class="game-screen__pile"
+          [class.game-screen__pile--active]="isActive('player2')"
+          [disabled]="!canTap('player2')"
+          (click)="onPileTap('player2')"
+          [attr.aria-label]="playerName('player2') + ' Stapel, ' + pileCount('player2') + ' Karten'"
+        >
+          <div class="game-screen__pile-stack">
+            @for (i of stackLayers(pileCount('player2')); track i) {
+              <app-card-view [faceDown]="true" class="game-screen__pile-card" [style.--stack-i]="i" />
+            }
+          </div>
+          <span class="game-screen__pile-count" aria-hidden="true">{{ pileCount('player2') }}</span>
+        </button>
+      </div>
+
+      <div class="game-screen__center-area">
+        @if (collecting(); as win) {
+          <p
+            class="game-screen__winner-banner"
+            [class.game-screen__winner-banner--flipped]="isFacingSeating() && win.winner === 'player2'"
+          >
+            {{ playerName(win.winner) }} gewinnt den Stich!
+          </p>
+        }
+        <div class="game-screen__center">
+        @if (centerPileCards().length > 0) {
+          <div
+            class="game-screen__center-stack"
+            [class.game-screen__center-stack--collecting]="collecting() !== null"
+            [class.game-screen__center-stack--fly-up]="collecting() && flightDirection() === 'up'"
+            [class.game-screen__center-stack--fly-down]="collecting() && flightDirection() === 'down'"
+            [class.game-screen__center-stack--fly-left]="collecting() && flightDirection() === 'left'"
+            [class.game-screen__center-stack--fly-right]="collecting() && flightDirection() === 'right'"
+          >
+            @for (c of centerPileCards(); track $index; let first = $first) {
+              <app-card-view
+                [card]="c"
+                class="game-screen__center-card"
+                [class.game-screen__center-card--bottom]="first && centerPileCards().length > 1"
+                [style.--stack-i]="$index"
+              />
+            }
+          </div>
+        } @else if (playingCard() === null) {
+          <div class="game-screen__center-placeholder"></div>
+        }
+        @if (playingCard(); as pm) {
+          <app-card-view
+            [card]="pm.card"
+            class="game-screen__playing-card"
+            [class.game-screen__playing-card--from-up]="directionFor(pm.player) === 'up'"
+            [class.game-screen__playing-card--from-down]="directionFor(pm.player) === 'down'"
+            [class.game-screen__playing-card--from-left]="directionFor(pm.player) === 'left'"
+            [class.game-screen__playing-card--from-right]="directionFor(pm.player) === 'right'"
+            [style.--stack-i]="centerPileCards().length"
+          />
+        }
+        </div>
+      </div>
+
+      <div class="game-screen__player" [class.game-screen__player--name-first]="isSideBySideSeating()">
+        <button
+          type="button"
+          class="game-screen__pile"
+          [class.game-screen__pile--active]="isActive('player1')"
+          [disabled]="!canTap('player1')"
+          (click)="onPileTap('player1')"
+          [attr.aria-label]="playerName('player1') + ' Stapel, ' + pileCount('player1') + ' Karten'"
+        >
+          <div class="game-screen__pile-stack">
+            @for (i of stackLayers(pileCount('player1')); track i) {
+              <app-card-view [faceDown]="true" class="game-screen__pile-card" [style.--stack-i]="i" />
+            }
+          </div>
+          <span class="game-screen__pile-count" aria-hidden="true">{{ pileCount('player1') }}</span>
+        </button>
+        <p class="game-screen__player-name">{{ playerName('player1') }}</p>
+      </div>
+        </div>
+
+        @if (showHistory()) {
+          <aside class="game-screen__history" aria-label="Spielverlauf">
+            <h2 class="game-screen__history-title">Spielverlauf</h2>
+            @if (historyEntries().length === 0) {
+              <p class="game-screen__history-empty">Noch keine Züge.</p>
+            } @else {
+              <ol class="game-screen__history-list" reversed>
+                @for (entry of historyEntries(); track entry.moveNumber) {
+                  <li class="game-screen__history-entry" [value]="entry.moveNumber">
+                    <span
+                      class="game-screen__history-glyph"
+                      [class.game-screen__history-suit--red]="entry.suitIsRed"
+                      aria-hidden="true"
+                      >{{ entry.cardGlyph }}</span
+                    >
+                    <span
+                      class="game-screen__history-suit"
+                      [class.game-screen__history-suit--red]="entry.suitIsRed"
+                      [attr.aria-label]="entry.suitLabel"
+                      >{{ entry.suitSymbol }}</span
+                    >
+                    {{ entry.rankLabel }}
+                    spielte {{ entry.playerName }}
+                    @if (entry.pileWon) {
+                      <strong class="game-screen__history-win"> – gewann {{ entry.pileSize }} Karten</strong>
+                    }
+                  </li>
+                }
+              </ol>
+            }
+          </aside>
+        }
+      </div>
+    </div>
+  }
+}
