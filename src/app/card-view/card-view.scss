@@ -1,0 +1,53 @@
+:host {
+  display: inline-block;
+  inline-size: 4.5rem;
+  block-size: 6.5rem;
+}
+
+.card-view__face {
+  inline-size: 100%;
+  block-size: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--space-1);
+  border-radius: var(--space-2);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  box-shadow: 0 var(--space-1) var(--space-2) rgba(0, 0, 0, 0.15);
+  color: var(--color-text);
+  font-weight: 700;
+
+  &--red {
+    color: var(--color-card-red);
+  }
+
+  &--down {
+    background: var(--color-accent);
+    border-color: var(--color-accent-hover);
+    background-image: repeating-linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.08) 0,
+      rgba(255, 255, 255, 0.08) var(--space-1),
+      transparent var(--space-1),
+      transparent var(--space-2)
+    );
+  }
+}
+
+.card-view__rank {
+  font-size: 1rem;
+  line-height: 1;
+
+  &--bottom {
+    align-self: flex-end;
+    transform: rotate(180deg);
+  }
+}
+
+.card-view__symbol {
+  font-size: 1.75rem;
+  text-align: center;
+  line-height: 1;
+}

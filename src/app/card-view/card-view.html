@@ -1,0 +1,13 @@
+<div
+  class="card-view__face"
+  [class.card-view__face--down]="isFaceDown()"
+  [class.card-view__face--red]="isRed()"
+  role="img"
+  [attr.aria-label]="ariaLabel()"
+>
+  @if (!isFaceDown()) {
+    <span class="card-view__rank card-view__rank--top" aria-hidden="true">{{ rankLabel() }}</span>
+    <span class="card-view__symbol" aria-hidden="true">{{ symbol() }}</span>
+    <span class="card-view__rank card-view__rank--bottom" aria-hidden="true">{{ rankLabel() }}</span>
+  }
+</div>

@@ -1,0 +1,417 @@
+:host {
+  display: block;
+}
+
+@keyframes turn-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-accent) 55%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 0 var(--space-2) transparent;
+  }
+}
+
+.game-screen__layout {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 100dvh;
+}
+
+.game-screen__history-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-4) 0;
+  accent-color: var(--color-accent);
+  cursor: pointer;
+  color: var(--color-text-secondary);
+}
+
+.game-screen__layout-row {
+  display: flex;
+  flex: 1;
+  align-items: stretch;
+}
+
+.game-screen__board {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+  padding: var(--space-6) var(--space-4);
+  box-sizing: border-box;
+
+  &--side-by-side {
+    flex-direction: row;
+  }
+}
+
+.game-screen__history {
+  flex-shrink: 0;
+  inline-size: 18rem;
+  padding: var(--space-6) var(--space-4);
+  border-inline-start: 1px solid var(--color-border);
+  box-sizing: border-box;
+  max-block-size: 100dvh;
+  overflow-y: auto;
+}
+
+.game-screen__history-title {
+  margin: 0 0 var(--space-4);
+  font-size: 1.125rem;
+}
+
+.game-screen__history-empty {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+.game-screen__history-list {
+  margin: 0;
+  padding-inline-start: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-size: 0.9375rem;
+}
+
+.game-screen__history-win {
+  color: var(--color-accent);
+}
+
+.game-screen__history-suit {
+  margin-inline-start: var(--space-1);
+  font-weight: 700;
+
+  &--red {
+    color: var(--color-card-red);
+  }
+}
+
+.game-screen__history-glyph {
+  font-size: 1.5rem;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+@media (max-width: 48rem) {
+  .game-screen__layout-row {
+    flex-direction: column;
+  }
+
+  .game-screen__history {
+    inline-size: auto;
+    border-inline-start: 0;
+    border-block-start: 1px solid var(--color-border);
+    max-block-size: 20rem;
+  }
+}
+
+.game-screen__player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+
+  &--rotated {
+    transform: rotate(180deg);
+  }
+
+  // player1's name normally comes after its pile in the DOM (name below cards,
+  // which reads correctly in the default column layout). In side-by-side mode
+  // both players sit symmetrically, so this pulls it to match player2's
+  // natural "name above cards" order without touching the DOM structure.
+  &--name-first .game-screen__player-name {
+    order: -1;
+  }
+}
+
+.game-screen__player-name {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.game-screen__pile {
+  position: relative;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  border-radius: var(--space-2);
+  cursor: default;
+
+  &:disabled {
+    cursor: default;
+  }
+
+  &--active:not(:disabled) {
+    cursor: pointer;
+    border-radius: var(--space-2);
+    animation: turn-pulse 1.4s ease-in-out infinite;
+  }
+
+  &--active:not(:disabled):focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}
+
+.game-screen__pile-stack {
+  position: relative;
+  inline-size: 5.25rem;
+  block-size: 7.25rem;
+}
+
+.game-screen__pile-card {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  transform: translate(calc(var(--stack-i) * var(--space-1)), calc(var(--stack-i) * var(--space-1)));
+}
+
+.game-screen__pile-count {
+  position: absolute;
+  inset-block-end: calc(-1 * var(--space-2));
+  inset-inline-end: calc(-1 * var(--space-2));
+  min-inline-size: var(--space-6);
+  padding: 0 var(--space-1);
+  border-radius: var(--space-6);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-align: center;
+  line-height: var(--space-5);
+}
+
+.game-screen__center-area {
+  position: relative;
+  inline-size: 6.5rem;
+  block-size: 8.5rem;
+}
+
+.game-screen__center {
+  position: relative;
+  inline-size: 100%;
+  block-size: 100%;
+  perspective: 40rem;
+}
+
+.game-screen__winner-banner {
+  // Deliberately a sibling of .game-screen__center, not a child: the center pile
+  // (incl. this text, if it were nested inside) rotates 90deg in facing seating so
+  // both players get the same view of the *cards* - but the winner text must stay
+  // readable, oriented toward whoever actually won, not rotated along with the pile.
+  position: absolute;
+  inset-block-end: 100%;
+  inset-inline-start: 50%;
+  --banner-rotate: 0deg;
+  transform: translateX(-50%) rotate(var(--banner-rotate));
+  margin: 0 0 var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 2px solid var(--color-background);
+  border-radius: var(--space-2);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-weight: 700;
+  white-space: nowrap;
+  text-align: center;
+  box-sizing: border-box;
+  animation:
+    winner-banner-in 300ms ease-out both,
+    winner-banner-out 400ms ease-in 2600ms both;
+
+  &--flipped {
+    // player2's whole card area is already shown rotated 180deg in facing seating
+    // (see .game-screen__player--rotated) - match that so they can read it upright.
+    --banner-rotate: 180deg;
+  }
+}
+
+@keyframes winner-banner-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) rotate(var(--banner-rotate)) scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) rotate(var(--banner-rotate)) scale(1);
+  }
+}
+
+@keyframes winner-banner-out {
+  to {
+    opacity: 0;
+  }
+}
+
+.game-screen__center-stack {
+  position: relative;
+  inline-size: 100%;
+  block-size: 100%;
+
+  &--fly-up {
+    --fly-x: 0px;
+    --fly-y: -9rem;
+  }
+
+  &--fly-down {
+    --fly-x: 0px;
+    --fly-y: 9rem;
+  }
+
+  &--fly-left {
+    --fly-x: -9rem;
+    --fly-y: 0px;
+  }
+
+  &--fly-right {
+    --fly-x: 9rem;
+    --fly-y: 0px;
+  }
+}
+
+.game-screen__center-card {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  transform: translate(calc(var(--stack-i) * var(--space-2)), calc(var(--stack-i) * var(--space-2)));
+
+  // The very bottom card (the trick-starting card) would otherwise end up almost
+  // fully covered by every later card in the fan - shift it further left so its
+  // suit stays readable throughout the trick.
+  &--bottom {
+    transform: translate(-1.75rem, 0);
+  }
+
+  // Each card flies off individually, in play order (--stack-i), a short delay
+  // after the previous one - not the whole pile moving as a single block.
+  .game-screen__center-stack--collecting & {
+    animation: collect-card 500ms ease-in both;
+    animation-delay: calc(2400ms + var(--stack-i) * 120ms);
+  }
+}
+
+@keyframes collect-card {
+  to {
+    transform: translate(
+        calc(var(--stack-i) * var(--space-2) + var(--fly-x, 0px)),
+        calc(var(--stack-i) * var(--space-2) + var(--fly-y, 0px))
+      )
+      rotateY(180deg) scale(0.5);
+    opacity: 0;
+  }
+}
+
+.game-screen__playing-card {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  z-index: 1;
+  animation: play-card-in 350ms ease-out both;
+
+  &--from-up {
+    --fly-x: 0px;
+    --fly-y: -9rem;
+  }
+
+  &--from-down {
+    --fly-x: 0px;
+    --fly-y: 9rem;
+  }
+
+  &--from-left {
+    --fly-x: -9rem;
+    --fly-y: 0px;
+  }
+
+  &--from-right {
+    --fly-x: 9rem;
+    --fly-y: 0px;
+  }
+}
+
+@keyframes play-card-in {
+  from {
+    transform: translate(
+      calc(var(--stack-i) * var(--space-2) + var(--fly-x, 0px)),
+      calc(var(--stack-i) * var(--space-2) + var(--fly-y, 0px))
+    );
+    opacity: 0.6;
+  }
+  to {
+    transform: translate(calc(var(--stack-i) * var(--space-2)), calc(var(--stack-i) * var(--space-2)));
+    opacity: 1;
+  }
+}
+
+.game-screen__center-placeholder {
+  inline-size: 4.5rem;
+  block-size: 6.5rem;
+  border: 2px dashed var(--color-border);
+  border-radius: var(--space-2);
+}
+
+.game-screen__result {
+  max-width: 28rem;
+  margin: var(--space-12) auto;
+  padding: var(--space-6) var(--space-4);
+  text-align: center;
+
+  &--perfect {
+    .game-screen__result-title {
+      color: var(--color-accent);
+    }
+  }
+}
+
+.game-screen__result-title {
+  font-size: 2rem;
+  margin: 0 0 var(--space-2);
+}
+
+.game-screen__result-meta {
+  margin: 0 0 var(--space-6);
+  color: var(--color-text-secondary);
+}
+
+.game-screen__result-counts {
+  display: grid;
+  grid-template-columns: auto auto;
+  justify-content: center;
+  gap: var(--space-1) var(--space-4);
+  margin: 0 0 var(--space-8);
+
+  dt {
+    font-weight: 600;
+  }
+
+  dd {
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+}
+
+.game-screen__submit {
+  font: inherit;
+  font-weight: 600;
+  padding: var(--space-3) var(--space-5);
+  border: 0;
+  border-radius: var(--space-2);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--color-accent-hover);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}

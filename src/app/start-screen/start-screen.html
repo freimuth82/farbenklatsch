@@ -1,0 +1,95 @@
+<section class="start-screen">
+  <h1 class="start-screen__title">Farbenklatsch</h1>
+  <a class="start-screen__rules-link" routerLink="/regeln">Spielanleitung</a>
+
+  <form class="start-screen__form" novalidate (submit)="onSubmit($event)">
+    <fieldset class="start-screen__fieldset">
+      <legend class="start-screen__legend">Spielmodus</legend>
+      <label class="start-screen__radio">
+        <input type="radio" value="vsComputer" [formField]="optionsForm.mode" />
+        Mensch gegen Computer
+      </label>
+      <label class="start-screen__radio">
+        <input type="radio" value="twoHumans" [formField]="optionsForm.mode" />
+        Zwei Menschen an einem Gerät
+      </label>
+    </fieldset>
+
+    <div class="start-screen__field">
+      <label class="start-screen__label" for="player1Name">
+        @if (optionsForm.mode().value() === 'twoHumans') {
+          Name Spieler 1
+        } @else {
+          Dein Name
+        }
+      </label>
+      <input
+        type="text"
+        id="player1Name"
+        class="start-screen__text"
+        [formField]="optionsForm.player1Name"
+        [attr.aria-invalid]="submitted() && optionsForm.player1Name().invalid() ? true : null"
+        [attr.aria-describedby]="submitted() && optionsForm.player1Name().invalid() ? 'player1Name-error' : null"
+      />
+      @if (submitted() && optionsForm.player1Name().invalid()) {
+        <p class="start-screen__error" id="player1Name-error">
+          {{ optionsForm.player1Name().errors()[0]?.message }}
+        </p>
+      }
+    </div>
+
+    @if (optionsForm.mode().value() === 'twoHumans') {
+      <div class="start-screen__field">
+        <label class="start-screen__label" for="player2Name">Name Spieler 2</label>
+        <input
+          type="text"
+          id="player2Name"
+          class="start-screen__text"
+          [formField]="optionsForm.player2Name"
+          [attr.aria-invalid]="submitted() && optionsForm.player2Name().invalid() ? true : null"
+          [attr.aria-describedby]="submitted() && optionsForm.player2Name().invalid() ? 'player2Name-error' : null"
+        />
+        @if (submitted() && optionsForm.player2Name().invalid()) {
+          <p class="start-screen__error" id="player2Name-error">
+            {{ optionsForm.player2Name().errors()[0]?.message }}
+          </p>
+        }
+      </div>
+
+      <fieldset class="start-screen__fieldset">
+        <legend class="start-screen__legend">Sitzordnung</legend>
+        <label class="start-screen__radio">
+          <input type="radio" value="facing" [formField]="optionsForm.seating" />
+          Gegenüber
+        </label>
+        <label class="start-screen__radio">
+          <input type="radio" value="sideBySide" [formField]="optionsForm.seating" />
+          Nebeneinander
+        </label>
+      </fieldset>
+    }
+
+    <fieldset class="start-screen__fieldset">
+      <legend class="start-screen__legend">Kartendeck</legend>
+      <label class="start-screen__radio">
+        <input type="radio" value="skat" [formField]="optionsForm.deckVariant" />
+        Skatblatt (32 Karten)
+      </label>
+      <label class="start-screen__radio">
+        <input type="radio" value="full52" [formField]="optionsForm.deckVariant" />
+        Klassisches Deck (52 Karten)
+      </label>
+    </fieldset>
+
+    <div class="start-screen__field">
+      <label class="start-screen__checkbox">
+        <input type="checkbox" [formField]="optionsForm.valueRuleEnabled" />
+        Wert-Regel (passender Wert zählt zusätzlich zur Farbe)
+      </label>
+    </div>
+
+    <p class="start-screen__hint">Reaktionszeit pro Zug: keine Begrenzung</p>
+
+    <button type="submit" class="start-screen__submit">Spiel starten</button>
+  </form>
+</section>
